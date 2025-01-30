@@ -95,11 +95,10 @@ class MainActivity : ComponentActivity() {
         TopAppBar(
             title = { Text(stringResource(R.string.app_name)) },
             colors = TopAppBarDefaults.topAppBarColors(
-//                containerColor = BlueGrey80,
                 titleContentColor = MaterialTheme.colorScheme.primary,
             ),
             actions = {
-                IconButton(onClick = { navController.navigate(SETTINGS_SCREEN) }) { // ✅ Use SETTINGS_SCREEN constant
+                IconButton(onClick = { navController.navigate(SETTINGS_SCREEN) }) {
                     Icon(imageVector = Icons.Default.Settings, contentDescription = "settings")
                 }
             }

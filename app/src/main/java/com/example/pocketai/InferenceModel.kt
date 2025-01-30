@@ -1,5 +1,6 @@
 package com.example.pocketai
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.util.Log
 import com.google.mediapipe.tasks.genai.llminference.LlmInference
@@ -38,7 +39,13 @@ class InferenceModel private constructor(private val context: Context) {
         get() = sharedPreferences.getInt(KEY_MAX_TOKENS, DEFAULT_MAX_TOKENS)
         set(value) {
             sharedPreferences.edit().putInt(KEY_MAX_TOKENS, value).apply()
-            recreateLlmInference(context) // Reinitialize model with new value
+//            recreateLlmInference(context) // Reinitialize model with new value
+        }
+    private var maxTopK: Int
+        get() = sharedPreferences.getInt(KEY_MAX_TOP_K, DEFAULT_MAX_TOP_K)
+        set(value) {
+            sharedPreferences.edit().putInt(KEY_MAX_TOP_K, value).apply()
+//            recreateLlmInference(context) // Reinitialize model with new value
         }
 
     init {
@@ -52,7 +59,7 @@ class InferenceModel private constructor(private val context: Context) {
         val options = LlmInference.LlmInferenceOptions.builder()
             .setModelPath(MODEL_PATH)
             .setMaxTokens(maxTokens)
-            .setMaxTopK(40)
+            .setMaxTopK(maxTopK)
             .setResultListener { partialResult, done ->
                 _partialResults.tryEmit(partialResult to done)
             }
@@ -79,10 +86,12 @@ class InferenceModel private constructor(private val context: Context) {
         }
     }
 
-    fun updateMaxTokens(newMaxTokens: Int) {
+    fun updateMaxTokensAndMaxTopK(newMaxTokens: Int, newMaxTopK: Int) {
         val previousValue = maxTokens
+        val previousTopK = maxTopK
         try {
             sharedPreferences.edit().putInt(KEY_MAX_TOKENS, newMaxTokens).apply()
+            sharedPreferences.edit().putInt(KEY_MAX_TOP_K, newMaxTopK).apply()
             coroutineScope.launch {  // Run recreation in background
                 mutex.withLock {
                     recreateLlmInference(context)
@@ -90,23 +99,28 @@ class InferenceModel private constructor(private val context: Context) {
             }
         } catch (e: Exception) {
             sharedPreferences.edit().putInt(KEY_MAX_TOKENS, previousValue).apply()
+            sharedPreferences.edit().putInt(KEY_MAX_TOP_K, previousTopK).apply()
             throw e
         }
     }
 
     suspend fun generateResponseAsync(prompt: String) {
         mutex.withLock {
-            val gemmaPrompt = prompt + "<start_of_turn>model\n"
+            val gemmaPrompt = "$prompt<start_of_turn>model\n"
             llmInference.generateResponseAsync(gemmaPrompt)
         }
     }
+
 
     companion object {
         private const val MODEL_PATH = "/data/local/tmp/gemma-2b-it-cpu-int4.bin"
         private const val PREFS_NAME = "llm_prefs"
         private const val KEY_MAX_TOKENS = "max_tokens"
+        private const val KEY_MAX_TOP_K = "max_top_k"
         private const val DEFAULT_MAX_TOKENS = 1024
+        private const val DEFAULT_MAX_TOP_K = 40
 
+        @SuppressLint("StaticFieldLeak")
         @Volatile
         private var instance: InferenceModel? = null
 
