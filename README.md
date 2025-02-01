@@ -1,9 +1,4 @@
 # PocketAI
-Below is a professional README in Markdown format without extraneous code:
-
----
-
-# PocketAI
 
 **PocketAI** is an Android application that demonstrates efficient on-device inference using a lightweight large language model (LLM). The app leverages the quantized Gemma 2B model to generate text responses directly on the device, ensuring low latency and preserving user privacy. The user interface is built with Jetpack Compose for a modern, responsive chat experience.
 
