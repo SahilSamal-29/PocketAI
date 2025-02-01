@@ -137,7 +137,6 @@ PocketAI/
 ---
 ## Screenshots
 
-### Splash Screen
 <img src="https://github.com/user-attachments/assets/f2b45520-e293-467e-872f-947759bc9b60" alt="Screenshot" width="250">
 <img src="https://github.com/user-attachments/assets/f097437c-7769-4f77-84e1-131dfb4585c4" alt="Screenshot" width="250">
 <br>
