@@ -154,12 +154,6 @@ Contributions are welcome. If you have suggestions, bug fixes, or enhancements, 
 
 ---
 
-## License
-
-This project is licensed under the [MIT License](LICENSE).
-
----
-
 ## Contact
 
 For questions or feedback, please contact:
