@@ -20,7 +20,7 @@ class InferenceModel private constructor(private val context: Context) {
 
     // Add a mutex to prevent concurrent access
     private val mutex = Mutex()
-    private val coroutineScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
+    private val coroutineScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
 
     private var llmInference: LlmInference
 
@@ -41,10 +41,10 @@ class InferenceModel private constructor(private val context: Context) {
             sharedPreferences.edit().putInt(KEY_MAX_TOKENS, value).apply()
 //            recreateLlmInference(context) // Reinitialize model with new value
         }
-    private var maxTopK: Int
-        get() = sharedPreferences.getInt(KEY_MAX_TOP_K, DEFAULT_MAX_TOP_K)
+    private var topK: Int
+        get() = sharedPreferences.getInt(KEY_TOP_K, DEFAULT_MAX_TOP_K)
         set(value) {
-            sharedPreferences.edit().putInt(KEY_MAX_TOP_K, value).apply()
+            sharedPreferences.edit().putInt(KEY_TOP_K, value).apply()
 //            recreateLlmInference(context) // Reinitialize model with new value
         }
 
@@ -55,11 +55,11 @@ class InferenceModel private constructor(private val context: Context) {
         llmInference = createLlmInference(context)
     }
 
-    private fun createLlmInference(context: Context): LlmInference {
+    private fun createLlmInference(context: Context,maxtokens: Int = DEFAULT_MAX_TOKENS, maxtopK: Int = DEFAULT_MAX_TOP_K  ): LlmInference {
         val options = LlmInference.LlmInferenceOptions.builder()
             .setModelPath(MODEL_PATH)
-            .setMaxTokens(maxTokens)
-            .setMaxTopK(maxTopK)
+            .setMaxTokens(maxtokens)
+            .setMaxTopK(maxtopK)
             .setResultListener { partialResult, done ->
                 _partialResults.tryEmit(partialResult to done)
             }
@@ -70,28 +70,29 @@ class InferenceModel private constructor(private val context: Context) {
 
     private fun recreateLlmInference(context: Context) {
         try {
-            // Cancel any ongoing operations
-//            llmInference.cancelAllOperations() // Add this if available in your LLM library
             llmInference.close()
         } catch (e: Exception) {
             Log.e("InferenceModel", "Error closing LLM instance", e)
         }
 
         try {
-            llmInference = createLlmInference(context)
+            llmInference = createLlmInference(context, maxTokens, topK)
+//            sharedPreferences.edit().putInt(KEY_MAX_TOKENS, maxTokens).apply()
+//            sharedPreferences.edit().putInt(KEY_MAX_TOP_K, maxTopK).apply()
         } catch (e: Exception) {
             Log.e("InferenceModel", "Error recreating LLM instance", e)
-            sharedPreferences.edit().putInt(KEY_MAX_TOKENS, maxTokens).apply()
+//            sharedPreferences.edit().putInt(KEY_MAX_TOKENS, maxTokens).apply()
+//            sharedPreferences.edit().putInt(KEY_MAX_TOP_K, maxTopK).apply()
             throw e
         }
     }
 
     fun updateMaxTokensAndMaxTopK(newMaxTokens: Int, newMaxTopK: Int) {
         val previousValue = maxTokens
-        val previousTopK = maxTopK
+        val previousTopK = topK
         try {
             sharedPreferences.edit().putInt(KEY_MAX_TOKENS, newMaxTokens).apply()
-            sharedPreferences.edit().putInt(KEY_MAX_TOP_K, newMaxTopK).apply()
+            sharedPreferences.edit().putInt(KEY_TOP_K, newMaxTopK).apply()
             coroutineScope.launch {  // Run recreation in background
                 mutex.withLock {
                     recreateLlmInference(context)
@@ -99,7 +100,7 @@ class InferenceModel private constructor(private val context: Context) {
             }
         } catch (e: Exception) {
             sharedPreferences.edit().putInt(KEY_MAX_TOKENS, previousValue).apply()
-            sharedPreferences.edit().putInt(KEY_MAX_TOP_K, previousTopK).apply()
+            sharedPreferences.edit().putInt(KEY_TOP_K, previousTopK).apply()
             throw e
         }
     }
@@ -111,12 +112,11 @@ class InferenceModel private constructor(private val context: Context) {
         }
     }
 
-
     companion object {
         private const val MODEL_PATH = "/data/local/tmp/gemma-2b-it-cpu-int4.bin"
         private const val PREFS_NAME = "llm_prefs"
         private const val KEY_MAX_TOKENS = "max_tokens"
-        private const val KEY_MAX_TOP_K = "max_top_k"
+        private const val KEY_TOP_K = "max_top_k"
         private const val DEFAULT_MAX_TOKENS = 1024
         private const val DEFAULT_MAX_TOP_K = 40
 

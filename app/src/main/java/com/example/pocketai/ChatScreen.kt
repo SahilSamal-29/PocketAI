@@ -120,7 +120,7 @@ fun ChatScreen(
                     .align(Alignment.CenterVertically)
                     .fillMaxWidth()
                     .weight(0.15f)
-                    .background(Grey80.copy(alpha = 0.5f), RoundedCornerShape(4.dp)),
+                    .background(Grey80.copy(alpha = 0.4f), RoundedCornerShape(4.dp)),
                 enabled = textInputEnabled
             ) {
                 Icon(

@@ -35,7 +35,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun SettingsScreen(navController: NavController, context: Context) {
     var maxTokens by rememberSaveable { mutableIntStateOf(getStoredMaxTokens(context)) }
-    var maxTopK by rememberSaveable { mutableIntStateOf(getStoredMaxTopK(context)) }
+    var TopK by rememberSaveable { mutableIntStateOf(getStoredMaxTopK(context)) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
     val backgroundColor = if(isSystemInDarkTheme()) {
@@ -129,11 +129,11 @@ fun SettingsScreen(navController: NavController, context: Context) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Max TopK",
+                        text = "TopK",
                         style = MaterialTheme.typography.titleMedium
                     )
                     Text(
-                        text = maxTopK.toString(),
+                        text = TopK.toString(),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -141,8 +141,8 @@ fun SettingsScreen(navController: NavController, context: Context) {
 
                 // Slider with custom styling
                 Slider(
-                    value = maxTopK.toFloat(),
-                    onValueChange = { maxTopK = it.toInt() },
+                    value = TopK.toFloat(),
+                    onValueChange = { TopK = it.toInt() },
                     valueRange = 40f..100f,
 //                    steps = 60,
                     modifier = Modifier.fillMaxWidth(),
@@ -160,7 +160,7 @@ fun SettingsScreen(navController: NavController, context: Context) {
             onClick = {
                 coroutineScope.launch(Dispatchers.IO) {
                     try {
-                        InferenceModel.getInstance(context).updateMaxTokensAndMaxTopK(maxTokens, maxTopK)
+                        InferenceModel.getInstance(context).updateMaxTokensAndMaxTopK(maxTokens, TopK)
                         withContext(Dispatchers.Main) {
                             navController.popBackStack()
                         }
@@ -168,7 +168,7 @@ fun SettingsScreen(navController: NavController, context: Context) {
                         withContext(Dispatchers.Main) {
                             errorMessage = "Failed to save: ${e.message}"
                             maxTokens = getStoredMaxTokens(context)
-                            maxTopK = getStoredMaxTopK(context)
+                            TopK = getStoredMaxTopK(context)
                         }
                     }
                 }
@@ -180,6 +180,7 @@ fun SettingsScreen(navController: NavController, context: Context) {
         ) {
             Text("Save Settings", modifier = Modifier.padding(4.dp))
         }
+    }
 
         // Error message
         errorMessage?.let { msg ->
@@ -190,7 +191,6 @@ fun SettingsScreen(navController: NavController, context: Context) {
             )
         }
     }
-}
 
 // Helper function to fetch stored maxTokens
 private fun getStoredMaxTokens(context: Context): Int {

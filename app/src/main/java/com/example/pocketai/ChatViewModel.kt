@@ -19,13 +19,10 @@ class ChatViewModel(
     // `GemmaUiState()` is optimized for the Gemma model.
     // Replace `GemmaUiState` with `ChatUiState()` if you're using a different model
     private val _uiState: MutableStateFlow<GemmaUiState> = MutableStateFlow(GemmaUiState())
-    val uiState: StateFlow<UiState> =
-        _uiState.asStateFlow()
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
-    private val _textInputEnabled: MutableStateFlow<Boolean> =
-        MutableStateFlow(true)
-    val isTextInputEnabled: StateFlow<Boolean> =
-        _textInputEnabled.asStateFlow()
+    private val _textInputEnabled: MutableStateFlow<Boolean> = MutableStateFlow(true)
+    val isTextInputEnabled: StateFlow<Boolean> = _textInputEnabled.asStateFlow()
 
     fun sendMessage(userMessage: String) {
         viewModelScope.launch(Dispatchers.IO) {
