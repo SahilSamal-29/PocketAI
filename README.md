@@ -1,4 +1,4 @@
-# PocketAI
+7# PocketAI
 
 **PocketAI** is an Android application that demonstrates efficient on-device inference using a lightweight large language model (LLM). The app leverages the quantized Gemma 2B model to generate text responses directly on the device, ensuring low latency and preserving user privacy. The user interface is built with Jetpack Compose for a modern, responsive chat experience.
 
@@ -153,5 +153,5 @@ Contributions are welcome. If you have suggestions, bug fixes, or enhancements, 
 For questions or feedback, please contact:
 
 **Sahil Samal**  
-Email: [your.email@example.com](samalsahil29@gmail.com)
+Email: [samalsahil29@gmail.com](samalsahil29@gmail.com)
 Contact no: 9833766076
